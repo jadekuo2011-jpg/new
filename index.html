@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岳陽樓記：心境之淵</title>
+    <!-- 引入 Tailwind CSS 處理排版與響應式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts: Noto Serif TC (思源宋體) 以呈現古風氛圍 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* 自訂樣式：古風主題與動畫 */
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background-color: #f4f1ea; /* 米黃色紙張背景 */
+            color: #2c2c2c; /* 深水墨灰文字 */
+            line-height: 1.8;
+            background-image: radial-gradient(#e5dfd3 1px, transparent 1px);
+            background-size: 20px 20px; /* 微微的紙張紋理感 */
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 古風按鈕樣式 */
+        .choice-btn {
+            background: transparent;
+            border: 1px solid #5a5a5a;
+            color: #2c2c2c;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-btn::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 0%; height: 100%;
+            background-color: #3b3b3b;
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .choice-btn:hover {
+            color: #f4f1ea;
+            border-color: #3b3b3b;
+        }
+
+        .choice-btn:hover::before {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- 遊戲主體容器 -->
+    <div class="max-w-2xl w-full bg-[#faf8f5] rounded-sm shadow-xl p-8 md:p-12 border border-[#e5dfd3] relative">
+        
+        <!-- 標題 -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-semibold tracking-widest mb-2">觀瀾：岳陽樓記</h1>
+            <p class="text-sm text-gray-500 tracking-[0.2em]">一場關於心境的抉擇</p>
+        </div>
+
+        <!-- 心境儀表板 (Mood Meter) -->
+        <div id="mood-container" class="mb-10 p-4 border border-gray-300 rounded-sm bg-[#f4f1ea]">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold tracking-wider">心境狀態</span>
+                <span id="mood-value-text" class="text-sm font-bold text-gray-700">平靜 (0)</span>
+            </div>
+            <!-- 進度條軌道 -->
+            <div class="relative w-full h-2 bg-gray-300 rounded-full mt-4">
+                <!-- 中心點標記 -->
+                <div class="absolute top-0 left-1/2 w-0.5 h-full bg-gray-500 transform -translate-x-1/2"></div>
+                <!-- 玩家心境游標 -->
+                <div id="mood-marker" class="absolute top-1/2 w-4 h-4 bg-[#2c2c2c] rounded-full transform -translate-y-1/2 -translate-x-1/2 shadow-md transition-all duration-700 ease-out" style="left: 50%;"></div>
+            </div>
+            <div class="flex justify-between text-xs mt-2 text-gray-500 font-bold">
+                <span>極悲 (-100)</span>
+                <span>中庸 (0)</span>
+                <span>極喜 (+100)</span>
+            </div>
+        </div>
+
+        <!-- 故事文字區 -->
+        <div id="story-area" class="min-h-[150px] mb-8 text-lg md:text-xl text-justify tracking-wide fade-in">
+            <!-- 文字將透過 JS 動態注入 -->
+        </div>
+
+        <!-- 選擇按鈕區 -->
+        <div id="choices-area" class="flex flex-col space-y-4 fade-in">
+            <!-- 按鈕將透過 JS 動態注入 -->
+        </div>
+
+    </div>
+
+    <!-- 遊戲邏輯腳本 -->
+    <script>
+        // 遊戲狀態變數
+        let currentMood = 0;
+        let currentSceneIndex = 0;
+
+        // 劇本資料
+        const storyData = [
+            {
+                // 第一景
+                text: "慶曆四年春，你因直言進諫被貶謫至巴陵郡。剛抵達此地，映入眼簾的是殘破的岳陽樓與因水災受苦的百姓。面對百廢待興的局面，你獨自站在江邊，心中作何感想？",
+                choices: [
+                    { text: "「唉，想我滿腹經綸，竟淪落至此...」對著殘破的樓閣與流民嘆息。", moodChange: -20 },
+                    { text: "「既來之則安之，這正是重新整頓、大展身手的好機會！」期待著重修此地。", moodChange: 20 },
+                    { text: "「多思無益，當務之急是先安撫流民。」收起情緒，專注於眼前的政務。", moodChange: 0 }
+                ]
+            },
+            {
+                // 第二景
+                text: "時光飛逝，岳陽樓終於重修落成。然而近日適逢梅雨季，霪雨霏霏，連月不開，陰風怒號，濁浪排空。你獨自登樓，看著灰暗慘淡的洞庭湖，寒風刺骨...",
+                choices: [
+                    { text: "回想自己被貶的遭遇，深感「去國懷鄉，憂讒畏譏」，心情鬱悶到了極點。", moodChange: -40 },
+                    { text: "不管這鬼天氣，命人擺上酒席！與同僚痛飲狂歡，把酒臨風，暫忘憂愁！", moodChange: 40 },
+                    { text: "陰晴圓缺皆是自然之理。不因這陰雨而悲傷，靜靜觀賞這風雨交加的壯闊之景。", moodChange: 0 }
+                ]
+            }
+        ];
+
+        // 結局資料
+        const endings = {
+            trueEnding: {
+                title: "【真結局】先天下之憂而憂",
+                text: "你收到范仲淹寄來的《岳陽樓記》。讀罷，你回首這段日子的起落。你沒有被貶謫的悲傷擊倒，也沒有沉溺於修樓的喜悅。你悟出了「不以物喜，不以己悲」的境界。未來的日子裡，你將帶著這份古仁人之心，繼續為天下蒼生盡一份力。",
+                color: "text-green-800"
+            },
+            badEnding1: {
+                title: "【悲劇結局】滿目蕭然，感極而悲",
+                text: "霪雨霏霏的景象與你心中的鬱結徹底融合。你終日借酒澆愁，無法擺脫政治鬥爭失敗的陰影。岳陽樓雖然修好了，但你的心卻永遠困在了那場悲風苦雨之中，鬱鬱而終。",
+                color: "text-blue-800"
+            },
+            badEnding2: {
+                title: "【沉淪結局】把酒臨風，其喜洋洋",
+                text: "你沉醉於重修岳陽樓的成就感與同僚的阿諛奉承之中。漸漸地，你忘記了當初直言進諫的抱負，也忘記了百姓的疾苦。你成了一個只知在名樓上飲酒作樂的平庸官僚，將治國理想拋諸腦後。",
+                color: "text-red-800"
+            }
+        };
+
+        // DOM 元素取得
+        const storyArea = document.getElementById('story-area');
+        const choicesArea = document.getElementById('choices-area');
+        const moodMarker = document.getElementById('mood-marker');
+        const moodValueText = document.getElementById('mood-value-text');
+
+        // 更新心境儀表板
+        function updateMoodUI() {
+            // 限制數值在 -100 到 100 之間
+            currentMood = Math.max(-100, Math.min(100, currentMood));
+            
+            // 計算百分比 (0對應50%，-100對應0%，100對應100%)
+            const percentage = (currentMood + 100) / 2;
+            moodMarker.style.left = `${percentage}%`;
+
+            // 更新文字描述
+            let moodDesc = "平靜";
+            if (currentMood <= -60) moodDesc = "極悲";
+            else if (currentMood < -20) moodDesc = "憂愁";
+            else if (currentMood >= 60) moodDesc = "極喜";
+            else if (currentMood > 20) moodDesc = "愉悅";
+
+            moodValueText.textContent = `${moodDesc} (${currentMood})`;
+        }
+
+        // 渲染當前場景
+        function renderScene() {
+            // 移除舊動畫類別以重新觸發
+            storyArea.classList.remove('fade-in');
+            choicesArea.classList.remove('fade-in');
+            
+            // 強制重繪以重置動畫
+            void storyArea.offsetWidth; 
+            
+            storyArea.classList.add('fade-in');
+            choicesArea.classList.add('fade-in');
+
+            if (currentSceneIndex < storyData.length) {
+                // 顯示一般場景
+                const scene = storyData[currentSceneIndex];
+                storyArea.innerHTML = `<p>${scene.text}</p>`;
+                
+                choicesArea.innerHTML = '';
+                scene.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'choice-btn w-full text-left py-3 px-6 rounded-sm font-medium';
+                    btn.textContent = choice.text;
+                    btn.onclick = () => makeChoice(choice.moodChange);
+                    choicesArea.appendChild(btn);
+                });
+            } else {
+                // 顯示結局
+                renderEnding();
+            }
+        }
+
+        // 處理玩家選擇
+        function makeChoice(moodChange) {
+            currentMood += moodChange;
+            updateMoodUI();
+            currentSceneIndex++;
+            renderScene();
+        }
+
+        // 渲染結局
+        function renderEnding() {
+            let result;
+            
+            // 根據心境數值判斷結局
+            if (currentMood >= -20 && currentMood <= 20) {
+                result = endings.trueEnding;
+            } else if (currentMood < -20) {
+                result = endings.badEnding1;
+            } else {
+                result = endings.badEnding2;
+            }
+
+            storyArea.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 ${result.color}">${result.title}</h2>
+                <p>${result.text}</p>
+            `;
+
+            choicesArea.innerHTML = '';
+            
+            // 重新開始按鈕
+            const restartBtn = document.createElement('button');
+            restartBtn.className = 'choice-btn w-full text-center py-4 px-6 rounded-sm font-bold mt-4 tracking-widest';
+            restartBtn.textContent = '重置心境，再次體驗';
+            restartBtn.onclick = restartGame;
+            choicesArea.appendChild(restartBtn);
+        }
+
+        // 重新開始遊戲
+        function restartGame() {
+            currentMood = 0;
+            currentSceneIndex = 0;
+            updateMoodUI();
+            renderScene();
+        }
+
+        // 遊戲初始化
+        window.onload = () => {
+            updateMoodUI();
+            renderScene();
+        };
+
+    </script>
+</body>
+</html>
